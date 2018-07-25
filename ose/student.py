@@ -18,18 +18,19 @@ class Student(object):
 
 class PoissonStudent(Student):
 
-    def __init__(self, lam):
+    def __init__(self, name, lam):
 
-        self.lam = lam
+        self.name = name
+        scale = 1 / lam
+        self.expT = expon(scale=scale)
         self.dt = []
         self.t = 0
 
     def study(self):
 
-        scale = 1 / self.lam
-        tau = expon(scale=scale)
+        tau = self.expT.rvs()
         self.dt.append(tau)
-        self.t += tau.value
+        self.t += tau
         s = {
             'actor': self.name,
             'verb': 'studied',
