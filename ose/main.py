@@ -8,7 +8,7 @@ def main():
     s3 = PoissonStudent("david", 0.5)
 
     students = [s1, s2, s3]
-    env = Environment(students, 3)
+    env = Environment(students)
     res = env.simulate(1000, debug=True)
 
     print(res)
