@@ -1,5 +1,5 @@
-from .environment import Environment
-from .student import PoissonStudent
+from environment import Environment
+from student import PoissonStudent
 
 
 def main():
@@ -9,9 +9,7 @@ def main():
 
     students = [s1, s2, s3]
     env = Environment(students)
-    res = env.simulate(1000, debug=True)
-
-    print(res)
+    res = env.simulate(1000, verbose=True)
 
 if __name__ == '__main__':
     main()

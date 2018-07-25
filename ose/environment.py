@@ -19,7 +19,7 @@ class Environment(object):
 
         self.students = students
 
-    def simulate(self, tmax, debug=False):
+    def simulate(self, tmax, verbose=False):
         """
         Simulate the interaction of students with resources
 
@@ -35,8 +35,9 @@ class Environment(object):
             for s in self.students:
                 statement = s.study()
                 t = statement['timestamp']
-                tmin = min(t, tmax)
+                tmin = min(t, tmin)
                 if t < tmax:
                     res.append(statement)
-                    logger.info(statement)
+                    if verbose:
+                        print("statement: {}".format(statement))
         return res
