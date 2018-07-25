@@ -21,8 +21,7 @@ class PoissonStudent(Student):
     def __init__(self, name, lam):
 
         self.name = name
-        scale = 1 / lam
-        self.expT = expon(scale=scale)
+        self.expT = expon(scale=1 / lam)
         self.dt = []
         self.t = 0
 
