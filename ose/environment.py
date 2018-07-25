@@ -36,8 +36,7 @@ class Environment(object):
                 statement = s.study()
                 t = statement['timestamp']
                 tmin = min(t, tmax)
-                if t > tmax:
-                    continue
-                res.append(statement)
-                logger.info(statement)
+                if t < tmax:
+                    res.append(statement)
+                    logger.info(statement)
         return res
