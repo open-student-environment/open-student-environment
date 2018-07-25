@@ -1,5 +1,5 @@
-from environment import Environment
-from student import PoissonStudent
+from .environment import Environment
+from .student import PoissonStudent
 
 
 def main():
