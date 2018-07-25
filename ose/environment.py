@@ -1,40 +1,43 @@
 """ Simulation environment """
+import logging
 
-from student import Student
-import datetime
-import numpy as np
+logger = logging.getLogger(__name__)
 
 
 class Environment(object):
 
-    def __init__(self, student_list, max_time=None):
+    def __init__(self, students):
+        """
+        A Class for modeling the environment.
+
+        Parameters
+        ----------
+
+        students: list[Student]
+            A list of students
         """
 
-        :param max_time:
-        """
-        self.student_list = student_list
-        self.max_time = max_time
+        self.students = students
 
-    def simulate(self, time_max=None, debug=False):
+    def simulate(self, tmax, debug=False):
         """
+        Simulate the interaction of students with resources
 
+        Parameters
+        ----------
+        tmax: float
+            End time for the simulation
         """
         res = []
-
-        if time_max == None:
-            time_max = self.max_time
-
-        tmin = time_max - np.finfo(float).eps
-        if debug:
-            i = 0
-            print(i)
-        while (tmin <= time_max):
-            for s in self.student_list:
-                temp = s.study()
-                tmin = min(temp['timestamp'], tmin)
-                if temp["timestamp"] < time_max:
-                    pass
-            i = i +1
-            if debug:
-                print("iteration : {} \t\t timestamp_min : {}".format(i, tmin))
+        tmin = 0
+        while(tmin < tmax):
+            tmin = tmax
+            for s in self.students:
+                statement = s.study()
+                t = statement['timestamp']
+                tmin = min(t, tmax)
+                if t > tmax:
+                    continue
+                res.append(statement)
+                logger.info(statement)
         return res
