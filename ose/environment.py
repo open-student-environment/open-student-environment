@@ -1,7 +1,4 @@
 """ Simulation environment """
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class Environment(object):
