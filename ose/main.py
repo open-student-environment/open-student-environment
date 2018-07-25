@@ -5,13 +5,13 @@ from student import PoissonStudent
 
 def main():
 
-    ps1 = PoissonStudent("arnaud",1)
+    ps1 = PoissonStudent("arnaud",0.1)
     ps2 = PoissonStudent("francois", 1)
     ps3 = PoissonStudent("david", 0.5)
 
     student_list = [ps1,ps2,ps3]
 
-    env = Environment(student_list,3)
+    env = Environment(student_list,0.5)
 
     res = env.simulate(1000,debug=True)
 

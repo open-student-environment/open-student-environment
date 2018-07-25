@@ -33,7 +33,7 @@ class Environment(object):
                 temp = s.study()
                 tmin = min(temp['timestamp'], tmin)
                 if temp["timestamp"] < time_max:
-                    pass
+                    res.append(s)
             i = i +1
             if debug:
                 print("iteration : {} \t\t timestamp_min : {}".format(i, tmin))
