@@ -1,7 +1,9 @@
 """ Student models """
 
 from abc import ABCMeta, abstractmethod
-from scipy.stats import expon
+from functools import reduce
+
+from pymc import Exponential
 
 
 class Student(object):
@@ -17,17 +19,29 @@ class Student(object):
 
 
 class PoissonStudent(Student):
+    """
+    Student model that generates activity according to a Poisson distribution.
+
+    Parameters
+    ----------
+    name: str
+        The name of the student
+    lam: float
+        `lambda` parameter for the Poisson distribution
+    """
 
     def __init__(self, name, lam):
 
         self.name = name
-        self.expT = expon(scale=1 / lam)
+        self.expT = Exponential('lambda_%s' % self.name, lam)
         self.dt = []
+        self.timestamps = []
         self.t = 0
+        self.params = [self.expT]
 
     def study(self):
 
-        tau = self.expT.rvs()
+        tau = self.expT.random()
         self.dt.append(tau)
         self.t += tau
         s = {
@@ -37,3 +51,15 @@ class PoissonStudent(Student):
             'timestamp': self.t
         }
         return s
+
+    def add(self, statement):
+        actor, name = statement['actor'], self.name
+        if actor != name:
+            raise('Statement with actor %s assigned to %s' % (actor, name))
+        self.timestamps.append(statement['timestamp'])
+
+    def fit(self):
+        self.timestamps = sorted(self.timestamps)
+        self.dt = reduce((lambda x, y: y - x), self.timestamps)
+        self.expT = self.dt
+        self.expT.observed = True
