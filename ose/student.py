@@ -26,7 +26,7 @@ class PoissonStudent(Student):
     ----------
     name: str
         The name of the student
-    lam: float
+    lam: float or pymc.Distribution
         `lambda` parameter for the Poisson distribution
     """
 
