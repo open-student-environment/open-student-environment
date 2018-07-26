@@ -43,7 +43,7 @@ class Environment(object):
                         print("statement: {}".format(statement))
         return res
 
-    def load(self, statements_file, student_builder, lamb = ):
+    def load(self, statements_file, student_builder ):
         """
         Load a given dataset in memory and create the students.
         If students have been given at environment creation,
