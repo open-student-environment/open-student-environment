@@ -19,6 +19,9 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install cython sphinx matplotlib
+            sudo apt-get update
+            sudo apt-get install -y graphviz texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra texlive-generic-extra latexmk texlive-xetex
             sudo apt-get install libatlas-base-dev gfortran
             pip install numpy==1.11.0
             pip install scipy==0.17.1
