@@ -66,7 +66,7 @@ class Environment(object):
             current_statement = self.extract_information(s)
             student_name = current_statement["actor"]
             if student_name not in student_hash.keys():
-                student_hash[student_name] = student_builder(student_name)
+                student_hash[student_name] = student_builder(student_name,1)
             else:
                 student_hash[student_name].add(current_statement)
 
