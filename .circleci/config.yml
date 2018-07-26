@@ -19,6 +19,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            sudo apt-get install libatlas-base-dev gfortran
             pip install numpy==1.11.0
             pip install scipy==0.17.1
             pip install -r requirements.txt
