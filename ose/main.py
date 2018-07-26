@@ -4,6 +4,9 @@ from student import PoissonStudent
 from pymc import 
 
 
+STATEMENTS_PATH = "/Users/davidpanou/Documents/eig/Maskott/data.json"
+
+
 def main():
     s1 = PoissonStudent("arnaud", 1)
     s2 = PoissonStudent("francois", 1)
@@ -20,5 +23,11 @@ def main():
     env.fit()
     env.show()
 
+
+def main2():
+    env = Environment(None)
+    env.load(STATEMENTS_PATH,PoissonStudent)
+    print(len(env.students))
+
 if __name__ == '__main__':
-    main()
+    main2()
