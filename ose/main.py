@@ -19,6 +19,8 @@ def main2():
     env = Environment(None)
     env.load(STATEMENTS_PATH,PoissonStudent)
     print(len(env.students))
+    print(list(map(lambda x : x.timestamps,env.students[1])))
+
 
 if __name__ == '__main__':
     main2()

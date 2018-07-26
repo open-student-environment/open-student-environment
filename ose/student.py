@@ -2,8 +2,8 @@
 
 from abc import ABCMeta, abstractmethod
 from functools import reduce
-
 from pymc import Exponential
+
 
 
 class Student(object):

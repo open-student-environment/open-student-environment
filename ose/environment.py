@@ -3,6 +3,7 @@
 import json
 from collections import defaultdict
 import functools
+import numpy as np
 
 class Environment(object):
 
@@ -42,7 +43,7 @@ class Environment(object):
                         print("statement: {}".format(statement))
         return res
 
-    def load(self, statements_file, student_builder):
+    def load(self, statements_file, student_builder, lamb = ):
         """
         Load a given dataset in memory and create the students.
         If students have been given at environment creation,
@@ -58,20 +59,23 @@ class Environment(object):
                  student are generated.
         """
         student_name = None
-        student_hash = defaultdict(functools.partial(student_builder,student_name,1))
+        student_hash = dict()
         statements = json.load(open(statements_file,"r"))
 
         for s in statements :
             current_statement = self.extract_information(s)
-            student_name = current_statement.pop("name")
-            student_hash[student_name].add(current_statement)
+            student_name = current_statement["actor"]
+            if student_name not in student_hash.keys():
+                student_hash[student_name] = student_builder(student_name)
+            else:
+                student_hash[student_name].add(current_statement)
 
         self.students  = list(student_hash.values())
 
 
     @staticmethod
     def extract_information(statement):
-        res = {"name": eval(statement["actor"])["account"]["name"],
+        res = {"actor": eval(statement["actor"])["account"]["name"],
                "verb": eval(statement["verb"])["display"],
                "timestamp": statement["timestamp"]}
         return res
