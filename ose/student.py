@@ -40,7 +40,9 @@ class PoissonStudent(Student):
         self.params = [self.expT]
 
     def study(self):
-
+        """
+        Generate an xAPI statement
+        """
         tau = self.expT.random()
         self.dt.append(tau)
         self.t += tau
