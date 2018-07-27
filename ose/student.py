@@ -32,6 +32,7 @@ class PoissonStudent(Student):
 
     def __init__(self, name, lam, env=None):
         super(PoissonStudent, self).__init__(name, env)
+        self.lam = lam
         self.expT = Exponential('lambda_%s' % self.name, lam)
         self.dt = []
         self.timestamps = []
@@ -50,7 +51,7 @@ class PoissonStudent(Student):
             'timestamp': self.t
         }
         if self.env is not None:
-            self.env.statements.append(s)
+            self.env.statements[self.name].append(s)
         return s
 
     def _get_timestamps(self, statements):
@@ -91,6 +92,6 @@ class PoissonStudent(Student):
         """
         self.timestamps = self._get_timestamps(statements)
         self.dt = reduce((lambda x, y: y - x), self.timestamps)
-        self.expT.value = self.dt
-        self.expT.observed = True
+        self.expT.value = Exponential(
+            self.name, self.lam, value=self.dt, observed=True)
         return self
