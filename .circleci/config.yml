@@ -36,11 +36,11 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            py.test
+            py.test --cov=ose --cov-report xml
       - run:
           name: coverage
           command: |
-            py.test --cov=ose --cov-report xml
+            . venv/bin/activate
             codecov
 
       - store_artifacts:
