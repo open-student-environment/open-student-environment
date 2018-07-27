@@ -8,7 +8,7 @@ import numpy as np
 class Environment(object):
 
 
-    def __init__(self, students, statements):
+    def __init__(self, students, statements=None):
         """
         A Class for modeling the environment.
 
@@ -23,8 +23,11 @@ class Environment(object):
         """
         self.students = dict()
         self._create_students_hash(students)
-        self.statements = _create_students_statements(statements)
-        self._update_students_statements()
+        if statements is not None :
+            self.statements = _create_students_statements(statements)
+            self._update_students_statements()
+        else :
+            self.statements = {s.name : [] for s in self.students.values()}
 
     def simulate(self, tmax, verbose=False):
         """
@@ -39,7 +42,7 @@ class Environment(object):
         tmin = 0
         while(tmin < tmax):
             tmin = tmax
-            for s in self.students:
+            for s in self.students.values():
                 statement = s.study()
                 t = statement['timestamp']
                 tmin = min(t, tmin)
@@ -47,11 +50,13 @@ class Environment(object):
                     res.append(statement)
                     if verbose:
                         print("statement: {}".format(statement))
+                self.add_statement(statement)
+            self._update_students_statements()
         return res
 
     def _create_students_hash(self,students):
         for s in students :
-            self.add(s)
+            self.add_student(s)
 
     def add_student(self,student):
         student.env = self
@@ -62,10 +67,11 @@ class Environment(object):
         Update the students statements
         :return:
         """
-        for s in self.students.keys():
-            s_statements = self.statements[s]
-            if s_statements :
-                self.students[s].update(s_statements)
+        for s_name in self.students.keys():
+            s_name_statements = self.statements[s_name]
+            print(s_name_statements)
+            if s_name_statements :
+                self.students[s_name].update(s_name_statements)
 
     @staticmethod
     def load_json_statements(statements_file):
@@ -83,7 +89,7 @@ class Environment(object):
         return statements
 
     def add_statement(self,statement):
-        self.statements[statement["name"]].add(statement)
+        self.statements[statement["actor"]].append(statement)
 
 def _create_students_statements(statements):
     """
@@ -97,7 +103,7 @@ def _create_students_statements(statements):
     return statements_hash
 
 def extract_information(statement):
-    res = {"name": eval(statement["actor"])["account"]["name"],
+    res = {"actor": eval(statement["actor"])["account"]["name"],
            "verb": eval(statement["verb"])["display"],
            "timestamp": statement["timestamp"]}
     return res

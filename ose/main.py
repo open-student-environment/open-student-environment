@@ -1,5 +1,6 @@
 from environment import Environment
 from student import PoissonStudent
+from pymc import Normal
 
 from pymc import 
 
@@ -24,12 +25,5 @@ def main():
     env.show()
 
 
-def main2():
-    env = Environment(None)
-    env.load(STATEMENTS_PATH,PoissonStudent)
-    print(len(env.students))
-    print(list(map(lambda x : x.timestamps,env.students[1])))
-
-
 if __name__ == '__main__':
-    main2()
+    main()
