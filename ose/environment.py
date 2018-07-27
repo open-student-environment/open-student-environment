@@ -7,7 +7,8 @@ import numpy as np
 
 class Environment(object):
 
-    def __init__(self, students):
+
+    def __init__(self, students, statements):
         """
         A Class for modeling the environment.
 
@@ -16,9 +17,13 @@ class Environment(object):
 
         students: list[Student]
             A list of students
-        """
 
-        self.students = students
+        statements: list[statements]
+            A list of statements in xAPI format
+        """
+        self.students = self._create_students_hash(students)
+        self.statements = self._create_students_statements(statements)
+        self._update_students_statements()
 
     def simulate(self, tmax, verbose=False):
         """
@@ -43,42 +48,58 @@ class Environment(object):
                         print("statement: {}".format(statement))
         return res
 
-    def load(self, statements_file, student_builder ):
+    def _create_students_hash(self,students):
         """
-        Load a given dataset in memory and create the students.
-        If students have been given at environment creation,
-        they will be deleted before creating the new ones.
-        In this version, all students are initialized at 1
+        This method create a student hash that
+        :param students:
+        :return:
+        """
+        student_hash = dict()
+        for s in students:
+            s.env = self
+            student_hash[s.name] = s
+        return student_hash
 
+    def _update_students_statements(self):
+        """
+        Update the
+        :return:
+        """
+        for s in self.students.keys():
+            s_statements = self.statements[s]
+            if s_statements :
+                self.students[s].update(s_statements)
+
+    @staticmethod
+    def load_json_statements(statements_file):
+        """
         Parameters
         ---------
         statements : JSON file contains xAPI statements
 
-        student_builder : Student
-                 A method that specifies the logic in which
-                 student are generated.
+        Return
+        ---------
+        statements : a list of statements extracted from the JSON file.
         """
-        student_name = None
-        student_hash = dict()
         statements = json.load(open(statements_file,"r"))
 
-        for s in statements :
-            current_statement = self.extract_information(s)
-            student_name = current_statement["actor"]
-            if student_name not in student_hash.keys():
-                student_hash[student_name] = student_builder(student_name,1)
-            else:
-                student_hash[student_name].add(current_statement)
+        return statements
 
-        self.students  = list(student_hash.values())
+    def add_statement(self,statement):
+        self.statements[statement["name"]].add(statement)
 
+def _create_students_statements(statements):
+    statements_hash = dict()
+    for s in statements :
+        statements_hash[s["name"]].add(s)
+    return statements_hash
 
-    @staticmethod
-    def extract_information(statement):
-        res = {"actor": eval(statement["actor"])["account"]["name"],
-               "verb": eval(statement["verb"])["display"],
-               "timestamp": statement["timestamp"]}
-        return res
+def extract_information(statement):
+    res = {"name": eval(statement["actor"])["account"]["name"],
+           "verb": eval(statement["verb"])["display"],
+           "timestamp": statement["timestamp"]}
+    return res
+
 
 
 
