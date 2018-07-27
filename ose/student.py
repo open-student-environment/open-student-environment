@@ -10,6 +10,7 @@ class Student(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, name, env=None):
+        self.env = env
         self.name = name
 
     @abstractmethod
