@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/open-student-environment/open-student-environment.svg?style=shield&circle-token=03ce5e2996c8d68da81e8d82b00bd5965c542b45)](https://circleci.com/gh/open-student-environment/open-student-environment)
+[![CircleCI](https://circleci.com/gh/open-student-environment/open-student-environment.svg?style=shield&circle-token=03ce5e2996c8d68da81e8d82b00bd5965c542b45)](https://circleci.com/gh/open-student-environment/open-student-environment) [![codecov](https://codecov.io/gh/open-student-environment/open-student-environment/branch/master/graph/badge.svg)](https://codecov.io/gh/open-student-environment/open-student-environment)
 
 # Open Student Environement
 
