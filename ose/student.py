@@ -5,7 +5,6 @@ from functools import reduce
 from pymc import Exponential
 
 
-
 class Student(object):
 
     __metaclass__ = ABCMeta
