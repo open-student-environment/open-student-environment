@@ -1,6 +1,8 @@
 from environment import Environment
 from student import PoissonStudent
 
+from pymc import 
+
 
 def main():
     s1 = PoissonStudent("arnaud", 1)
@@ -9,7 +11,14 @@ def main():
 
     students = [s1, s2, s3]
     env = Environment(students)
-    res = env.simulate(1000, verbose=True)
+    statements = env.simulate(1000, verbose=True)
+
+    student_names = set(s['actor'] for s in statements)
+    lam = Normal('lam', mu=0, sigma=1)
+    students = [PoissonStudent(name=name, lam=lam) for name in student_names]
+    env = Environment(students, statements)
+    env.fit()
+    env.show()
 
 if __name__ == '__main__':
     main()
