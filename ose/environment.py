@@ -21,8 +21,9 @@ class Environment(object):
         statements: list[statements]
             A list of statements in xAPI format
         """
-        self.students = self._create_students_hash(students)
-        self.statements = self._create_students_statements(statements)
+        self.students = dict()
+        self._create_students_hash(students)
+        self.statements = _create_students_statements(statements)
         self._update_students_statements()
 
     def simulate(self, tmax, verbose=False):
@@ -49,20 +50,16 @@ class Environment(object):
         return res
 
     def _create_students_hash(self,students):
-        """
-        This method create a student hash that
-        :param students:
-        :return:
-        """
-        student_hash = dict()
-        for s in students:
-            s.env = self
-            student_hash[s.name] = s
-        return student_hash
+        for s in students :
+            self.add(s)
+
+    def add_student(self,student):
+        student.env = self
+        self.students[student.name] = student
 
     def _update_students_statements(self):
         """
-        Update the
+        Update the students statements
         :return:
         """
         for s in self.students.keys():
@@ -89,6 +86,11 @@ class Environment(object):
         self.statements[statement["name"]].add(statement)
 
 def _create_students_statements(statements):
+    """
+    This method takes
+    :param statements:
+    :return:
+    """
     statements_hash = dict()
     for s in statements :
         statements_hash[s["name"]].add(s)
