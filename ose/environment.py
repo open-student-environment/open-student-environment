@@ -2,11 +2,9 @@
 
 import json
 from collections import defaultdict
-import functools
-import numpy as np
+
 
 class Environment(object):
-
 
     def __init__(self, students, statements=None):
         """
@@ -50,15 +48,13 @@ class Environment(object):
                     res.append(statement)
                     if verbose:
                         print("statement: {}".format(statement))
-                self.add_statement(statement)
-            self._update_students_statements()
         return res
 
-    def _create_students_hash(self,students):
-        for s in students :
+    def _create_students_hash(self, students):
+        for s in students:
             self.add_student(s)
 
-    def add_student(self,student):
+    def add_student(self, student):
         student.env = self
         self.students[student.name] = student
 
@@ -69,8 +65,7 @@ class Environment(object):
         """
         for s_name in self.students.keys():
             s_name_statements = self.statements[s_name]
-            print(s_name_statements)
-            if s_name_statements :
+            if s_name_statements:
                 self.students[s_name].update(s_name_statements)
 
     @staticmethod
@@ -84,12 +79,13 @@ class Environment(object):
         ---------
         statements : a list of statements extracted from the JSON file.
         """
-        statements = json.load(open(statements_file,"r"))
+        statements = json.load(open(statements_file, "r"))
 
         return statements
 
-    def add_statement(self,statement):
+    def add_statement(self, statement):
         self.statements[statement["actor"]].append(statement)
+
 
 def _create_students_statements(statements):
     """
@@ -97,10 +93,11 @@ def _create_students_statements(statements):
     :param statements:
     :return:
     """
-    statements_hash = dict()
-    for s in statements :
-        statements_hash[s["name"]].add(s)
+    statements_hash = defaultdict(list)
+    for s in statements:
+        statements_hash[s['actor']].append(s)
     return statements_hash
+
 
 def extract_information(statement):
     res = {"actor": eval(statement["actor"])["account"]["name"],

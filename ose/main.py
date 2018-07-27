@@ -1,11 +1,6 @@
 from environment import Environment
 from student import PoissonStudent
-from pymc import Normal
-
-from pymc import 
-
-
-STATEMENTS_PATH = "/Users/davidpanou/Documents/eig/Maskott/data.json"
+from pymc import Uniform
 
 
 def main():
@@ -18,11 +13,11 @@ def main():
     statements = env.simulate(1000, verbose=True)
 
     student_names = set(s['actor'] for s in statements)
-    lam = Normal('lam', mu=0, sigma=1)
+    lam = Uniform('lam', lower=0, upper=1)
     students = [PoissonStudent(name=name, lam=lam) for name in student_names]
     env = Environment(students, statements)
-    env.fit()
-    env.show()
+#     env.fit()
+#     env.show()
 
 
 if __name__ == '__main__':
