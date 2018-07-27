@@ -37,6 +37,11 @@ jobs:
           command: |
             . venv/bin/activate
             pytest
+      - run:
+          name: coverage
+          command: |
+            pytest --cov=ose --cov-report xml
+            codecov
 
       - store_artifacts:
           path: test-reports
