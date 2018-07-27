@@ -2,7 +2,6 @@
 
 from abc import ABCMeta, abstractmethod
 from functools import reduce
-
 from pymc import Exponential
 
 
@@ -10,7 +9,7 @@ class Student(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, name):
+    def __init__(self, name, env=None):
         self.name = name
 
     @abstractmethod
@@ -30,9 +29,8 @@ class PoissonStudent(Student):
         `lambda` parameter for the Poisson distribution
     """
 
-    def __init__(self, name, lam):
-
-        self.name = name
+    def __init__(self, name, lam, env=None):
+        super(PoissonStudent, self).__init__(name, env)
         self.expT = Exponential('lambda_%s' % self.name, lam)
         self.dt = []
         self.timestamps = []
@@ -40,9 +38,7 @@ class PoissonStudent(Student):
         self.params = [self.expT]
 
     def study(self):
-        """
-        Generate an xAPI statement
-        """
+
         tau = self.expT.random()
         self.dt.append(tau)
         self.t += tau
@@ -52,27 +48,48 @@ class PoissonStudent(Student):
             'object': 'resource',
             'timestamp': self.t
         }
+        if self.env is not None:
+            self.env.statements.append(s)
         return s
 
-    def add(self, statement):
+    def _get_timestamps(self, statements):
         """
-        Add the xAPI statement the history of the student.
+        Extract timestamps from xAPI statement
 
         Parameters
         ----------
-        statement: Statement
-            The xAPI statement to add to the model
-        """
-        actor, name = statement['actor'], self.name
-        if actor != name:
-            raise('Statement with actor %s assigned to %s' % (actor, name))
-        self.timestamps.append(statement['timestamp'])
+        statements: list[Statement]
+            The xAPI statements used to compute time intervals.
 
-    def fit(self):
+        Return
+        ------
+        timestamps: float
+            A sorted list of timestamps
         """
-        Builds a Bayesian Network from the history of xAPI statements
+        timestamps = []
+        for statement in statements:
+            actor, name = statement['actor'], self.name
+            if actor != name:
+                raise('Statement with actor %s assigned to %s' % (actor, name))
+            timestamps.append(statement['timestamp'])
+        return sorted(timestamps)
+
+    def update(self, statements):
         """
-        self.timestamps = sorted(self.timestamps)
+        Updates the sample graph using the history of xAPI statements
+
+        Parameters
+        ----------
+        statements: list[Statements]
+            A list of xAPI statements
+
+        Return
+        ------
+        self: PoissonStudent
+            The current instance of a PoissonStudent
+        """
+        self.timestamps = self._get_timestamps(statements)
         self.dt = reduce((lambda x, y: y - x), self.timestamps)
-        self.expT = self.dt
+        self.expT.value = self.dt
         self.expT.observed = True
+        return self
