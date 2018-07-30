@@ -42,17 +42,27 @@ class Test(unittest.TestCase):
         env = Environment(self.students, self.statements)
         self.assertEqual(len(env.statements.keys()),
                          3,
-                         "The environment created a different" +
-                         " number of student than there is in" +
-                         " the statements")
+                         msg="The environment created a different"
+                             " number of student than there is in"
+                             " the statements")
 
     def test_add_student(self):
         env = Environment(self.students, self.statements)
         student = PoissonStudent(name='John', lam=2)
         env.add_student(student)
-        # self.assertEqual(len(env.students.keys()), 2,
-        #                 "Adding a student didn't change the number of" +
-        #                 "student in the environment")
+        self.assertEqual(len(env.students.keys()), 2,
+                         msg="Adding a student didn't change the number of" +
+                             "student in the environment")
+
+    def test_statements_added_to_student(self):
+        env = Environment(self.students, self.statements)
+        student = PoissonStudent(name='John', lam=2)
+        env.add_student(student)
+        self.assertEqual(len(env.students[student.name].dt),
+                         len(env.statements[
+                                 student.name]),
+                         msg="The student statements and dt have different "
+                             "sizes")
 
 
 if __name__ == "__main__":

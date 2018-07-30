@@ -37,7 +37,11 @@ class Environment(object):
             self.students[student.name].update(statements)
 
     def add_statement(self, statement):
-        self.statements[statement['actor']].append(statement)
+        student_name = statement['actor']
+        statements = self.statements[student_name]
+        statements.append(statement)
+        if student_name in self.students.keys():
+            self.students[student_name].update(statements)
 
     def simulate(self, tmax, verbose=False):
         """
