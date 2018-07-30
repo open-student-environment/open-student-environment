@@ -2,12 +2,11 @@
 
 import json
 from collections import defaultdict
-import functools
-import numpy as np
+
 
 class Environment(object):
 
-    def __init__(self, students):
+    def __init__(self, students, statements=None):
         """
         A Class for modeling the environment.
 
@@ -16,9 +15,30 @@ class Environment(object):
 
         students: list[Student]
             A list of students
-        """
 
-        self.students = students
+        statements: list[statements]
+            A list of statements in xAPI format
+        """
+        self.students = dict()
+        self.statements = defaultdict(list)
+
+        for s in students:
+            self.add_student(s)
+        if statements is not None:
+            for s in statements:
+                self.add_statement(s)
+        else:
+            self.statements = {s.name: [] for s in self.students.values()}
+
+    def add_student(self, student):
+        student.env = self
+        self.students[student.name] = student
+        student_statements = self.statements[student.name]
+        if student_statements:
+            self.students[student.name].update(student_statements)
+
+    def add_statement(self, statement):
+        self.statements[statement['actor']].append(statement)
 
     def simulate(self, tmax, verbose=False):
         """
@@ -31,9 +51,9 @@ class Environment(object):
         """
         res = []
         tmin = 0
-        while(tmin < tmax):
+        while (tmin < tmax):
             tmin = tmax
-            for s in self.students:
+            for s in self.students.values():
                 statement = s.study()
                 t = statement['timestamp']
                 tmin = min(t, tmin)
@@ -43,48 +63,24 @@ class Environment(object):
                         print("statement: {}".format(statement))
         return res
 
-    def load(self, statements_file, student_builder, lamb = ):
+    @staticmethod
+    def load_json_statements(statements_file):
         """
-        Load a given dataset in memory and create the students.
-        If students have been given at environment creation,
-        they will be deleted before creating the new ones.
-        In this version, all students are initialized at 1
 
         Parameters
         ---------
         statements : JSON file contains xAPI statements
-
-        student_builder : Student
-                 A method that specifies the logic in which
-                 student are generated.
+        Return
+        ---------
+        statements : a list of statements extracted from the JSON file.
         """
-        student_name = None
-        student_hash = dict()
-        statements = json.load(open(statements_file,"r"))
+        statements = json.load(open(statements_file, "r"))
 
-        for s in statements :
-            current_statement = self.extract_information(s)
-            student_name = current_statement["actor"]
-            if student_name not in student_hash.keys():
-                student_hash[student_name] = student_builder(student_name)
-            else:
-                student_hash[student_name].add(current_statement)
-
-        self.students  = list(student_hash.values())
+        return statements
 
 
-    @staticmethod
-    def extract_information(statement):
-        res = {"actor": eval(statement["actor"])["account"]["name"],
-               "verb": eval(statement["verb"])["display"],
-               "timestamp": statement["timestamp"]}
-        return res
-
-
-
-
-
-
-
-
-
+def extract_information(statement):
+    res = {"actor": eval(statement["actor"])["account"]["name"],
+           "verb": eval(statement["verb"])["display"],
+           "timestamp": statement["timestamp"]}
+    return res
