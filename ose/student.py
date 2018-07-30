@@ -12,7 +12,6 @@ class WrongAssignment(Exception):
 
 
 class Student(object):
-
     __metaclass__ = ABCMeta
 
     def __init__(self, name, env=None):

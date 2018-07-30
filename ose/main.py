@@ -1,4 +1,4 @@
-from environment import Environment
+from environment import Environment, load_json_statements
 from student import PoissonStudent
 from pymc import Uniform
 
@@ -18,7 +18,6 @@ def main():
     env = Environment(students, statements)
 #     env.fit()
 #     env.show()
-
 
 if __name__ == '__main__':
     main()
