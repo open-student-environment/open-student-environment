@@ -1,8 +1,14 @@
 """ Student models """
 
 from abc import ABCMeta, abstractmethod
-from functools import reduce
+
+import numpy as np
+
 from pymc import Exponential
+
+
+class WrongAssignment(Exception):
+    pass
 
 
 class Student(object):
@@ -71,7 +77,8 @@ class PoissonStudent(Student):
         for statement in statements:
             actor, name = statement['actor'], self.name
             if actor != name:
-                raise ('Statement with actor %s assigned to %s' % (actor, name))
+                raise WrongAssignment('Statement with actor %s assigned to'
+                                      ' %s' % (actor, name))
             timestamps.append(statement['timestamp'])
         return sorted(timestamps)
 
@@ -90,7 +97,9 @@ class PoissonStudent(Student):
             The current instance of a PoissonStudent
         """
         self.timestamps = self._get_timestamps(statements)
-        self.dt = reduce((lambda x, y: y - x), self.timestamps)
-        self.expT.value = Exponential(
+        tt = zip([0] + self.timestamps[:-1], self.timestamps)
+        dt = [y - x for x, y in tt]
+        self.dt = np.array(dt, dtype=float)
+        self.expT = Exponential(
             self.name, self.lam, value=self.dt, observed=True)
         return self
