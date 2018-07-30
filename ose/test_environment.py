@@ -54,6 +54,8 @@ class Test(unittest.TestCase):
                          "Adding a student didn't change the number of"
                          "student in the environment")
 
+    def test_load_json(self):
+        pass
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testPoissonStudent']

@@ -1,9 +1,6 @@
-from environment import Environment
+from environment import Environment, load_json_statements
 from student import PoissonStudent
 from pymc import Uniform
-
-
-STATEMENTS_PATH = "/Users/davidpanou/Documents/eig/Maskott/data.json"
 
 
 def main():
@@ -22,14 +19,5 @@ def main():
 #     env.fit()
 #     env.show()
 
-
-
-def main2():
-    env = Environment(None)
-    env.load(STATEMENTS_PATH,PoissonStudent)
-    print(len(env.students))
-    print(list(map(lambda x : x.timestamps,env.students[1])))
-
-
 if __name__ == '__main__':
-    main2()
+    main()
