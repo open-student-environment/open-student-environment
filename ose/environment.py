@@ -22,12 +22,12 @@ class Environment(object):
         self.students = dict()
         self.statements = defaultdict(list)
 
+        if statements:
+            for s in statements:
+                self.add_statement(s)
         for s in students:
             self.add_student(s)
-        for s in statements:
-            self.add_statement(s)
-        else:
-            self.statements = {s.name: [] for s in self.students.values()}
+
 
     def add_student(self, student):
         student.env = self
