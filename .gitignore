@@ -3,3 +3,9 @@ __pycache__
 .idea
 .DS_Store
 venv
+data
+.cache/
+build/
+dist/
+examples/.ipynb_checkpoints/
+ose.egg-info/
