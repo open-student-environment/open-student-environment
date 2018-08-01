@@ -63,18 +63,23 @@ class Environment(object):
                         print("statement: {}".format(statement))
         return res
 
+    def fit(self, params, sampler, **kwargs):
+        params.extend([s.params for s in self.students.values()])
+        sampler = sampler(params)
+        sampler.sample(iter=10000, burn=1000, thin=10)
+        return sampler
+
 
 def load_json_statements(statements_file):
     """
     Parameters
-    ---------
+    ----------
     statements : JSON file contains xAPI statements
     Return
     ---------
     statements : a list of statements extracted from the JSON file.
     """
     statements = json.load(open(statements_file, "r"))
-
     return statements
 
 
