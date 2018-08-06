@@ -21,7 +21,10 @@ class Test(unittest.TestCase):
     def setUp(self):
         base_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), os.pardir))
-        filename = os.path.join(base_path, 'data/test.json')
+        path = os.path.join(base_path, 'data')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        filename = os.path.join(path, 'test.json')
         self.filename = filename
         with open(filename, 'w') as f:
             f.write(agents)
