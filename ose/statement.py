@@ -1,8 +1,8 @@
 """ Statement handler """
 from datetime import datetime
-from pytz import timezone
 import json
 import os
+from pytz import timezone
 
 
 class Statement(object):
@@ -10,7 +10,7 @@ class Statement(object):
     def __init__(self, actor, verb, timestamp):
         self.actor = actor
         self.verb = verb
-        self.timestamp = _timestamp_to_float(timestamp)
+        self.timestamp = timestring_to_timestamp(timestamp)
 
 
 def load_file(filename):
@@ -37,7 +37,7 @@ def load_file(filename):
     return data
 
 
-def _timestamp_to_float(timestamp, form):
+def timestring_to_timestamp(timestring, form):
     """
     Convert a string timestamp to a float epoch.
 
@@ -54,10 +54,12 @@ def _timestamp_to_float(timestamp, form):
     epoch: float
         The epoch equivalent representation of the timestamp string.
     """
-    timestamp = timestamp.split('.')[0]
-    d_time = datetime.strptime(timestamp, form).replace(tzinfo=timezone(
-        'UTC'))
-    return float(d_time.strftime('%s'))
+    epoch = datetime(1970,1,1)
+    dt = datetime.strptime(timestring.split('.')[0], form)
+    td = dt - epoch
+    return td.total_seconds()
+
+
 
 
 def extract_information_educlever(statement):
@@ -81,8 +83,7 @@ def extract_information_educlever(statement):
     form = '%Y-%m-%dT%H:%M:%S'
     res = {'actor': statement['actor']['account']['name'],
            'verb': statement['verb']['id'],
-           'timestamp': _timestamp_to_float(statement['timestamp'], form)}
-    # return Statement(res['actor'], res['verb'], res['timestamp'])
+           'timestamp': timestring_to_timestamp(statement['timestamp'], form)}
     return res
 
 

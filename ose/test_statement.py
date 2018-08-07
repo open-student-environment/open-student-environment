@@ -13,8 +13,10 @@ class Test(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_extract_time(self):
+        pass
+
     def test_load_statements(self):
-        # TODO : Change the way we load the data for this test
         filename = 'data/test/statements_sample.json'
         statements = load_file(filename)
         usable_statement = load_statements(statements)
@@ -28,11 +30,10 @@ class Test(unittest.TestCase):
         res = extract_information_educlever(statement[0])
         gt = {'actor': u'123456789-1234-1234-1234-12345678901234',
               'verb': u'http://adlnet.gov/expapi/verbs/completed',
-              'timestamp': 1519858825.0}
+              'timestamp': 1519862425.0}
         self.assertDictEqual(res, gt,
                              msg="The statement loaded and the result "
                                  "extracted are not the same")
-
 
 if __name__ == "__main__":
     unittest.main()
