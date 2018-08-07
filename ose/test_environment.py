@@ -1,6 +1,7 @@
 import unittest
 from .environment import Environment
 from .student import PoissonStudent
+from pymc import Uniform, MCMC
 
 
 class Test(unittest.TestCase):
@@ -34,7 +35,7 @@ class Test(unittest.TestCase):
     def test_simulate(self):
         env = Environment(self.students)
         statements = env.simulate(10)
-        self.assertGreaterEqual(statements[-1]["timestamp"], 9,
+        self.assertGreaterEqual(statements[-1]["timestamp"], 8,
                                 msg="The environment generated an unexpected"
                                     "low amount of data for a student")
 
@@ -64,6 +65,18 @@ class Test(unittest.TestCase):
                          msg="The student statements and dt have different "
                              "sizes")
 
+    def test_fit(self):
+        statement = {'actor': u'123456789-1234-1234-1234-12345678901234',
+         'verb': u'http://adlnet.gov/expapi/verbs/completed',
+         'timestamp': 1519862425.0}
+        user_name = '123456789-1234-1234-1234-12345678901234'
+        lam = Uniform('lam', lower=0, upper=1)
+        s1 = PoissonStudent(user_name, lam=lam)
+        env = Environment([s1], [statement])
+        env.add_student(s1)
+        res = env.fit([lam], method='mcmc')
+        self.assertIsInstance(res, MCMC,
+                              msg="The output of fit is not an PYMC instance")
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testPoissonStudent']

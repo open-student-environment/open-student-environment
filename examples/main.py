@@ -1,30 +1,30 @@
-from pymc import Uniform, MCMC, Model
+from pymc import Uniform, MCMC
 from pylab import hist, show
-from statement import load_statements, load_file
+from ose.statement import load_statements, load_file
 
-from environment import Environment
-from student import PoissonStudent
+from ose.environment import Environment
+from ose.student import PoissonStudent
 
 
 def main():
-    s1 = PoissonStudent("arnaud", .3)
-    s2 = PoissonStudent("francois", .3)
-    s3 = PoissonStudent("david", .2)
+    s1 = PoissonStudent("arnaud", 1)
+    s2 = PoissonStudent("francois", 1)
+    s3 = PoissonStudent("david", 0.5)
 
     students = [s1, s2, s3]
     env = Environment(students)
     statements = env.simulate(1000, verbose=True)
 
     student_names = set(s['actor'] for s in statements)
-    students = [PoissonStudent(name=name) for name in student_names]
+    lam = Uniform('lam', lower=0, upper=1)
+    students = [PoissonStudent(name=name, lam=lam) for name in student_names]
     env = Environment(students, statements)
-    params = []
+    params = [lam]
     for s in students:
         params.extend(s.params)
-    m = Model(params)
-    sampler = MCMC(m)
-    sampler.sample(iter=10000, burn=1000, thin=10)
-    hist(sampler.trace('lam_arnaud')[:])
+    m = MCMC(params)
+    m.sample(iter=10000, burn=1000, thin=10)
+    hist(m.trace('lambda_david')[:])
     show()
 
 
@@ -40,7 +40,7 @@ def main2():
     env = Environment([s1], statements)
     env.add_student(s1)
     res = env.fit([lam], method='mcmc')
-
+    print(res)
     ## plotting. can be integrated in env
     hist(res.trace('lambda_{}'.format(user_name))[:])
     show()
