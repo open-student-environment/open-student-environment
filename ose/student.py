@@ -2,7 +2,8 @@
 
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from pymc import Exponential
+from pymc import Exponential, Uniform
+
 
 
 class WrongAssignment(Exception):
@@ -33,14 +34,17 @@ class PoissonStudent(Student):
         `lambda` parameter for the Poisson distribution
     """
 
-    def __init__(self, name, lam, env=None):
+    def __init__(self, name, lam=None, env=None):
         super(PoissonStudent, self).__init__(name, env)
-        self.lam = lam
-        self.expT = Exponential('lambda_%s' % self.name, lam)
+        if lam is not None:
+            self.lam = lam
+        else:
+            self.lam = Uniform('lam_%s' % self.name, lower=0, upper=1)
+        self.expT = Exponential('tau_%s' % self.name, self.lam)
         self.dt = []
         self.timestamps = []
         self.t = 0
-        self.params = [self.expT]
+        self.params = [self.lam, self.expT]
 
     def study(self):
 
@@ -99,5 +103,6 @@ class PoissonStudent(Student):
         dt = [y - x for x, y in tt]
         self.dt = np.array(dt, dtype=float)
         self.expT = Exponential(
-            self.name, self.lam, value=self.dt, observed=True)
+            'tau_%s' % self.name, self.lam, value=self.dt, observed=True)
+        self.params.append(self.expT)
         return self
