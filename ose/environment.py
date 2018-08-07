@@ -16,15 +16,14 @@ class Environment(object):
         students: list[Student]
             A list of students
 
-        statements: list[statements]
+        statements: list[Statement]
             A list of statements in xAPI format
         """
         self.students = dict()
         self.statements = defaultdict(list)
 
-        if statements:
-            for s in statements:
-                self.add_statement(s)
+        for s in statements:
+            self.add_statement(s)
         for s in students:
             self.add_student(s)
 
