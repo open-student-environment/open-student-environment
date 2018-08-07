@@ -1,6 +1,7 @@
 import unittest
 from .environment import Environment
 from .student import PoissonStudent
+from pymc import Uniform, MCMC
 
 
 class Test(unittest.TestCase):
@@ -64,6 +65,15 @@ class Test(unittest.TestCase):
                          msg="The student statements and dt have different "
                              "sizes")
 
+    def test_fit(self):
+        user_name = "2890ebd9-1147-4f16-8a65-b7239bd54bd0"
+        lam = Uniform('lam', lower=0, upper=1)
+        s1 = PoissonStudent(user_name, lam=lam)
+        env = Environment([s1], statements)
+        env.add_student(s1)
+        res = env.fit([lam], method='mcmc')
+        self.assertIsInstance(res, MCMC,
+                              msg="The output of fit is not an PYMC instance")
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testPoissonStudent']
