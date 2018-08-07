@@ -34,18 +34,16 @@ def main2():
     user_name = "2890ebd9-1147-4f16-8a65-b7239bd54bd0"
     user_name = "2890ebd9-1147-4f16-8a65-b7239bd54bd0"
     lam = Uniform('lam', lower=0, upper=1)
-    s1 = PoissonStudent(user_name, lam = lam)
+    s1 = PoissonStudent(user_name, lam=lam)
 
     ## Creating environment and fitting data
-    env = Environment([s1],statements)
-    m = MCMC
+    env = Environment([s1], statements)
     env.add_student(s1)
-    res = env.fit([lam],m)
+    res = env.fit([lam], method='mcmc')
 
     ## plotting. can be integrated in env
     hist(res.trace('lambda_{}'.format(user_name))[:])
     show()
-
 
 
 if __name__ == '__main__':
