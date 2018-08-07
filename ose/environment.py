@@ -28,7 +28,6 @@ class Environment(object):
         for s in students:
             self.add_student(s)
 
-
     def add_student(self, student):
         student.env = self
         self.students[student.name] = student

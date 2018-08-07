@@ -1,9 +1,7 @@
 """ Student models """
 
 from abc import ABCMeta, abstractmethod
-
 import numpy as np
-
 from pymc import Exponential
 
 

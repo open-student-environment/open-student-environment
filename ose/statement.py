@@ -1,10 +1,8 @@
 """ Statement handler """
 from datetime import datetime
+from pytz import timezone
 import json
 import os
-
-class WrongAssignment(Exception):
-    pass
 
 
 class Statement(object):
@@ -29,7 +27,7 @@ def load_file(filename):
     statement: list[statements]
         Returns an xAPI list of statements.
     """
-    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), \
+    base_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir))
     filename = os.path.join(base_path, filename)
     data = []
@@ -37,23 +35,6 @@ def load_file(filename):
         for line in f.readlines():
             data.append(json.loads(line))
     return data
-
-
-def _convert_datetime_to_epoch(d_time):
-    """
-    Convert a given datetime object to an epoch float.
-
-    Parameters
-    ----------
-    d_time: datetime
-        The datetime object to convert.
-
-    Returns
-    -------
-    epoch: float
-        The epoch equivalent representation of the datetime object.
-    """
-    return float(d_time.strftime('%s'))
 
 
 def _timestamp_to_float(timestamp, form):
@@ -74,8 +55,9 @@ def _timestamp_to_float(timestamp, form):
         The epoch equivalent representation of the timestamp string.
     """
     timestamp = timestamp.split('.')[0]
-    d_time = datetime.strptime(timestamp, form)
-    return _convert_datetime_to_epoch(d_time)
+    d_time = datetime.strptime(timestamp, form).replace(tzinfo=timezone(
+        'UTC'))
+    return float(d_time.strftime('%s'))
 
 
 def extract_information_educlever(statement):
@@ -102,15 +84,6 @@ def extract_information_educlever(statement):
            'timestamp': _timestamp_to_float(statement['timestamp'], form)}
     # return Statement(res['actor'], res['verb'], res['timestamp'])
     return res
-
-
-# def extract_information_maskott(statement):
-#     form = '%Y-%m-%dT%H:%M:%S'
-#     res = {'actor': eval(statement['actor'])['account']['name'],
-#            'verb': eval(statement['verb'])['id'],
-#            'timestamp': _timestamp_to_float(statement['timestamp'], form)}
-#     # return Statement(res['actor'], res['verb'], res['timestamp'])
-#     return res
 
 
 def load_statements(statements):
