@@ -76,7 +76,7 @@ def graph2gephi(nodes, adjancy, filename='test.gdf'):
     Arguments
     ---------
     nodes: list[str]
-    List of agent's names
+        List of agent's names
 
     adjancy: dict(str: [Agents])
         Adjancy lists indexed by agent name (agent_names -> agents)
@@ -89,6 +89,38 @@ def graph2gephi(nodes, adjancy, filename='test.gdf'):
         for parent, children in list(adjancy.items()):
             for child in children:
                 f.write("{}, {}, {}\n".format(parent, child, 1))
+
+def filter_by_users(nodes, adjancy, user_reference):
+    """
+    Takes a list of nodes and an adjancy list. Remove the non referenced
+    users from the passed user reference list.
+
+    Arguments
+    ---------
+    nodes: set[str]
+        List of agent's names.
+
+    adjancy: dict(str: [Agents])
+        Adjancy lists indexed by agent name (agent_names -> agents).
+
+    user_reference: set[str]
+        The reference set of users.
+
+    Returns
+    -------
+    nodes_clean:
+        The filtered nodes set.
+
+    nodes_clean:
+        The filtered adjancy list.
+    """
+    nodes_clean = nodes.intersection(user_reference)
+    adjancy_clean = {}
+    for k,v in adjancy.items():
+        if k in user_reference:
+            adjancy_clean[k] = v.intersection(user_reference)
+    return nodes_clean, adjancy_clean
+
 
 
 if __name__ == "__main__":
