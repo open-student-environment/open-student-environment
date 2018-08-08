@@ -54,6 +54,7 @@ def get_agents_graph(data):
         if role == 'user:enseignant':
             for g in user['organizations']:
                 adjancy[username].append(g['id'])
+                agents[g['id']] = 'group'
             if user['uai']is not None:
                 school = user['uai'].replace(',', '|')
                 adjancy[school].append(username)

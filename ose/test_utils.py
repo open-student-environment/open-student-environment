@@ -40,12 +40,12 @@ class Test(unittest.TestCase):
         data = load_agent_data(self.filename)
         nodes, adjancy = get_agents_graph(data)
         agents = {
-            'a', 'b', 1, 3, 5480, 'c', 2, 'd', 'e', '0951099D', 'f',
-            '0060138T', 'g', 'h', 'i'
+            'a', 1, 2, 3, 5480, 17177, 19272, 30207, 30367, 'b', 'c', 'd', 'e',
+            102, '0951099D', 'f', 116, '0060138T', 'g', 123, 'h', 'i', 130
         }
         self.assertEqual(nodes.keys(), agents)
-        self.assertEqual(set(nodes.keys()).difference(set(adjancy.keys())),
-                         {'d', 'b', 'c', 'h'})
+        self.assertEqual(set(nodes.keys()).union(set(adjancy.keys())),
+                         set(nodes.keys()))
 
     def test_graph2gephi(self):
         data = load_agent_data(self.filename)
