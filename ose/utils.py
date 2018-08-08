@@ -41,23 +41,23 @@ def get_agents_graph(data):
     ------
     adjancy: dict [str -> str]
     """
-    agents = defaultdict(dict)
-    adjancy = defaultdict(list)
+    agents = defaultdict(str)
+    adjancy = defaultdict(set)
     for user in data:
         username = user['uuid']
         role = user['role']
         agents[username] = role
         if role == 'user:eleve':
             for g in user['organizations']:
-                adjancy[g['id']].append(username)
+                adjancy[g['id']].add(username)
                 agents[g['id']] = 'group'
         if role == 'user:enseignant':
             for g in user['organizations']:
-                adjancy[username].append(g['id'])
+                adjancy[username].add(g['id'])
                 agents[g['id']] = 'group'
             if user['uai']is not None:
                 school = user['uai'].replace(',', '|')
-                adjancy[school].append(username)
+                adjancy[school].add(username)
                 agents[school] = 'school'
     return agents, adjancy
 
