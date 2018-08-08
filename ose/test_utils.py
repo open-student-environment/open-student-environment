@@ -50,7 +50,8 @@ class Test(unittest.TestCase):
     def test_graph2gephi(self):
         data = load_agent_data(self.filename)
         nodes, adjancy = get_agents_graph(data)
-        graph2gephi(nodes, adjancy, filename='../data/test-output.csv')
+        graph2gephi(nodes, adjancy, filename='./test-output.csv')
+        os.remove('./test-output.csv')
 
 if __name__ == "__main__":
     unittest.main()
