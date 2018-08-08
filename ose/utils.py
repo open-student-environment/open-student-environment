@@ -90,7 +90,7 @@ def graph2gephi(nodes, adjancy, filename='test.gdf'):
             for child in children:
                 f.write("{}, {}, {}\n".format(parent, child, 1))
 
-def filter_by_ref_users(nodes, adjancy, user_reference):
+def filter_by_users(nodes, adjancy, user_reference):
     """
     Takes a list of nodes and an adjancy list. Remove the non referenced
     users from the passed user reference list.
