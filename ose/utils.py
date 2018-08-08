@@ -41,7 +41,7 @@ def get_agents_graph(data):
     ------
     adjancy: dict [str -> str]
     """
-    agents = defaultdict(str)
+    agents = {}
     adjancy = defaultdict(set)
     for user in data:
         username = user['uuid']
