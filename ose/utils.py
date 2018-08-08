@@ -125,12 +125,12 @@ def filter_by_users(nodes, adjancy, active_agents):
     nodes_clean:
         The filtered adjancy list.
     """
-    nodes_keep = {}
+    nodes_keep = set()
     for name, role in nodes.items():
         if name in active_agents and role == 'user:eleve':
             nodes_keep.add(name)
 
-    for node_name in adjancy.keys():
+    for node_name in dict(adjancy).keys():
         if dfs(node_name, adjancy, nodes):
             nodes_keep.add(node_name)
 
