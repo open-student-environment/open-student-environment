@@ -84,7 +84,7 @@ def graph2gephi(nodes, adjancy, filename='test.gdf'):
                 f.write("{}, {}, {}\n".format(parent, child, 1))
 
 
-def create_user_reference(statements):
+def get_active_agents(statements):
     """
     Takes a list of statements and returns a reference users list.
 
@@ -100,7 +100,8 @@ def create_user_reference(statements):
     """
     return {s['actor'] for s in statements}
 
-def filter_by_users(nodes, adjancy, user_reference):
+
+def filter_by_users(nodes, adjancy, active_agents):
     """
     Takes a list of nodes and an adjancy list. Remove the non referenced
     users from the passed user reference list.
@@ -124,9 +125,44 @@ def filter_by_users(nodes, adjancy, user_reference):
     nodes_clean:
         The filtered adjancy list.
     """
-    nodes_clean = nodes.intersection(user_reference)
-    adjancy_clean = {}
-    for k,v in adjancy.items():
-        if k in user_reference:
-            adjancy_clean[k] = v.intersection(user_reference)
+    nodes_keep = {}
+    for name, role in nodes.items():
+        if name in active_agents and role == 'user:eleve':
+            nodes_keep.add(name)
+
+    for node_name in adjancy.keys():
+        if dfs(node_name, adjancy, nodes):
+            nodes_keep.add(node_name)
+
+    nodes_clean = {k: v for k, v in nodes.items() if k in nodes_keep}
+    adjancy_clean = {k: v for k, v in adjancy.items() if k in nodes_keep}
+
     return nodes_clean, adjancy_clean
+
+
+def dfs(node_name, adjancy, nodes_role):
+    """
+    Finds if there is a student in the children of `node_name`
+
+    Arguments
+    ---------
+    node_name: str
+        Name of the current node
+
+    adjancy: dict(str: [str])
+        Adjancy list of agents
+
+    nodes_role: dict(str: str)
+        Role of the agents
+
+    Return
+    ------
+    True or False
+    """
+    if nodes_role[node_name] == 'user:eleve':
+        return True
+    else:
+        for child_name in adjancy[node_name]:
+            if dfs(child_name, adjancy, nodes_role):
+                return True
+    return False
