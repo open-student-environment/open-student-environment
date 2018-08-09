@@ -81,7 +81,8 @@ def graph2gephi(nodes, adjancy, filename='test.gdf'):
         f.write('edgedef> node1 VARCHAR, node2 VARCHAR, weight DOUBLE\n')
         for parent, children in list(adjancy.items()):
             for child in children:
-                f.write("{}, {}, {}\n".format(parent, child, 1))
+                weight = 1 if nodes[parent] == 'group' else 3
+                f.write("{}, {}, {}\n".format(parent, child, weight))
 
 
 def get_active_agents(statements):
@@ -131,16 +132,18 @@ def filter_by_users(nodes, adjancy, active_agents):
             nodes_keep.add(name)
 
     for node_name in dict(adjancy).keys():
-        if dfs(node_name, adjancy, nodes):
+        if contains_active_student(node_name, adjancy, nodes, nodes_keep):
             nodes_keep.add(node_name)
 
     nodes_clean = {k: v for k, v in nodes.items() if k in nodes_keep}
-    adjancy_clean = {k: v for k, v in adjancy.items() if k in nodes_keep}
+    adjancy_clean = {k: v.intersection(nodes_keep) for k, v in adjancy.items()
+                     if k in nodes_keep}
+    # TODO: Could be interesting to keep the inactive users for plotting.
 
     return nodes_clean, adjancy_clean
 
 
-def dfs(node_name, adjancy, nodes_role):
+def contains_active_student(node_name, adjancy, roles, keep):
     """
     Finds if there is a student in the children of `node_name`
 
@@ -152,17 +155,16 @@ def dfs(node_name, adjancy, nodes_role):
     adjancy: dict(str: [str])
         Adjancy list of agents
 
-    nodes_role: dict(str: str)
+    roles: dict(str: str)
         Role of the agents
 
     Return
     ------
     True or False
     """
-    if nodes_role[node_name] == 'user:eleve':
+    if node_name in keep:
         return True
-    else:
-        for child_name in adjancy[node_name]:
-            if dfs(child_name, adjancy, nodes_role):
-                return True
+    for child_name in adjancy[node_name]:
+        if contains_active_student(child_name, adjancy, roles, keep):
+            return True
     return False
