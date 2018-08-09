@@ -58,7 +58,7 @@ class PoissonStudent(Student):
             'timestamp': self.t
         }
         if self.env is not None:
-            self.env.statements[self.name].append(s)
+            self.env._statements[self.name].append(s)
         return s
 
     def _get_timestamps(self, statements):

@@ -121,7 +121,5 @@ class Environment(object):
             timestamps = [datetime.datetime.fromtimestamp(s['timestamp']) for s
                           in self._statements[student]]
             y = [1] * len(timestamps)
-            print("Indice student {} -- {} statements".format(i,
-                                                            len(timestamps)))
             axes[i].stem(timestamps, y)
         plt.savefig(group_name+".png")
