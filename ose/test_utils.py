@@ -2,7 +2,10 @@ import os
 
 import unittest
 
+from .statement import load_file, load_statements
 from .utils import load_agent_data, get_agents_graph, graph2gephi
+from .utils import get_active_agents
+from ose.utils import filter_by_users
 
 
 agents = """{"uuid":"a","uai":null,"role":"user:enseignant","isEphemeral":0,"schoolLevels":[],"organizations":[{"id":1,"label":"Ecole du chemin","type":"ecole"},{"id":2,"label":"Classe de CP","type":"classe"},{"id":3,"label":"Enseignant Duchmol","type":"classe"},{"id":5480,"label":"L3-Anglais","type":"groupe"},{"id":17177,"label":"Groupe 2","type":"groupe"},{"id":19272,"label":"Les CM1","type":"groupe"},{"id":30207,"label":"Groupe VERT","type":"groupe"},{"id":30367,"label":"GROUPE B","type":"groupe"}],"isolution":"brneac3"}
@@ -46,6 +49,15 @@ class Test(unittest.TestCase):
         self.assertEqual(nodes.keys(), agents)
         self.assertEqual(set(nodes.keys()).union(set(adjancy.keys())),
                          set(nodes.keys()))
+
+    def test_filter_by_users(self):
+        data = load_file('data/test/statements_sample.json')
+        statements = load_statements(data)
+        data = load_agent_data(self.filename)
+        nodes, adjancy = get_agents_graph(data)
+        active_agents = get_active_agents(statements)
+        filter_by_users(nodes, adjancy, active_agents)
+        # TODO: Check for real
 
     def test_graph2gephi(self):
         data = load_agent_data(self.filename)
