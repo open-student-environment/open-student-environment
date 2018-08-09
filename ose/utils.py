@@ -28,7 +28,7 @@ def load_agent_data(filename):
     return data
 
 
-def get_agents_graph(data):
+def get_structure(data):
     """
     Extracts adjancy information from the list of agents
 
@@ -39,7 +39,9 @@ def get_agents_graph(data):
 
     Return
     ------
-    adjancy: dict [str -> str]
+    agents: dict [str -> str]
+
+    adjancy: dict [str -> list[str]]
     """
     agents = {}
     adjancy = defaultdict(set)
@@ -104,7 +106,7 @@ def get_active_agents(statements):
 
 def filter_by_users(nodes, adjancy, active_agents):
     """
-    Takes a list of nodes and an adjancy list. Remove the non referenced
+    Takes a list of nodes, an adjancy list. Remove the non referenced
     users from the passed user reference list.
 
     Arguments

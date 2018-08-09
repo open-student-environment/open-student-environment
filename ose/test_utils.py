@@ -3,7 +3,7 @@ import os
 import unittest
 
 from .statement import load_file, load_statements
-from .utils import load_agent_data, get_agents_graph, graph2gephi
+from .utils import load_agent_data, get_structure, graph2gephi
 from .utils import get_active_agents
 from ose.utils import filter_by_users
 
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
     def test_build_graph_from_data(self):
         data = load_agent_data(self.filename)
-        nodes, adjancy = get_agents_graph(data)
+        nodes, adjancy = get_structure(data)
         agents = {
             'a', 1, 2, 3, 5480, 17177, 19272, 30207, 30367, 'b', 'c', 'd', 'e',
             102, '0951099D', 'f', 116, '0060138T', 'g', 123, 'h', 'i', 130
@@ -54,14 +54,14 @@ class Test(unittest.TestCase):
         data = load_file('data/test/statements_sample.json')
         statements = load_statements(data)
         data = load_agent_data(self.filename)
-        nodes, adjancy = get_agents_graph(data)
+        nodes, adjancy = get_structure(data)
         active_agents = get_active_agents(statements)
         filter_by_users(nodes, adjancy, active_agents)
         # TODO: Check for real
 
     def test_graph2gephi(self):
         data = load_agent_data(self.filename)
-        nodes, adjancy = get_agents_graph(data)
+        nodes, adjancy = get_structure(data)
         graph2gephi(nodes, adjancy, filename='./test-output.csv')
         os.remove('./test-output.csv')
 

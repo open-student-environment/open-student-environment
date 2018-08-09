@@ -3,41 +3,53 @@
 import json
 from collections import defaultdict
 from pymc import MCMC
+import datetime
 
 
 class Environment(object):
 
-    def __init__(self, students=[], statements=[]):
+    def __init__(self, agents=[], statements=[], nodes=None, structure=None):
         """
         A Class for modeling the environment.
 
         Parameters
         ----------
 
-        students: list[Student]
+        agents: list[Student]
             A list of students
 
         statements: list[Statement]
             A list of statements in xAPI format
+
+        structure: dict[str: list[str]]
+
         """
         self.students = dict()
-        self.statements = defaultdict(list)
+        self._statements = defaultdict(list)
 
         for s in statements:
             self.add_statement(s)
-        for s in students:
+        for s in agents:
             self.add_student(s)
+        if nodes is not None:
+            self.nodes = nodes
+        if structure is not None:
+            self.structure = structure
 
     def add_student(self, student):
         student.env = self
         self.students[student.name] = student
-        statements = self.statements[student.name]
+        statements = self._statements[student.name]
         if statements:
             self.students[student.name].update(statements)
 
+    @property
+    def statements(self):
+        return [e  for l in self._statements.values() for e in l]
+
     def add_statement(self, statement):
         student_name = statement['actor']
-        statements = self.statements[student_name]
+        statements = self._statements[student_name]
         statements.append(statement)
         if student_name in self.students.keys():
             self.students[student_name].update(statements)
@@ -89,3 +101,27 @@ class Environment(object):
         sampler = method_dict[method.lower()](params)
         sampler.sample(iter=10000, burn=1000, thin=10)
         return sampler
+
+    def _get_students(self, agent):
+        role = self.nodes[agent]
+        if role == 'user:eleve':
+            return set([agent])
+        students = set()
+        for child in self.structure[agent]:
+            students = students.union(self._get_students(child))
+        return students
+
+    def plot_group_activity(self, group_name):
+        import matplotlib.pyplot as plt
+        students = self._get_students(group_name)
+        print("STUDENTS : {}".format(students))
+        f, axes = plt.subplots(len(students), 1, sharex='col', sharey='row',
+                               figsize=(15, len(students)))
+        for i, student in enumerate(students):
+            timestamps = [datetime.datetime.fromtimestamp(s['timestamp']) for s
+                          in self._statements[student]]
+            y = [1] * len(timestamps)
+            print("Indice student {} -- {} statements".format(i,
+                                                            len(timestamps)))
+            axes[i].stem(timestamps, y)
+        plt.savefig(group_name+".png")
