@@ -1,23 +1,23 @@
 """ Simulation environment """
 
-import json
 from collections import defaultdict
 from pymc import MCMC
 import datetime
-from ose.utils import filter_by_users, get_active_agents
+
+from ose.agent import Role
 
 
 class Environment(object):
 
-    def __init__(self, agents=[], statements=[], nodes=None, structure=None):
+    def __init__(self, agents=[], statements=[]):
         """
         A Class for modeling the environment.
 
         Parameters
         ----------
 
-        agents: list[Student]
-            A list of students
+        agents: list[Agents]
+            A list of agents
 
         statements: list[Statement]
             A list of statements in xAPI format
@@ -25,43 +25,60 @@ class Environment(object):
         structure: dict[str: list[str]]
 
         """
-        self.students = dict()
+        self._agents = {}
         self._statements = defaultdict(list)
 
-        for s in statements:
-            self.add_statement(s)
-        for s in agents:
-            self.add_student(s)
-        if nodes is not None:
-            self.nodes = nodes
-        if structure is not None:
-            self.structure = structure
+        self.statements = statements
+        self.agents = agents
+        self.nodes, self.structure = self._get_structure(agents)
 
-    def add_student(self, student):
-        student.env = self
-        self.students[student.name] = student
-        statements = self._statements[student.name]
-        if statements:
-            self.students[student.name].update(statements)
+    @property
+    def agents(self):
+        return [a for a in self._agents.values()]
+
+    @agents.setter
+    def agents(self, agents):
+        for a in agents:
+            self.add_agent(a)
+
+    @property
+    def students(self):
+        return [s for s in self.agents if s.role == Role.STUDENT]
+
+    @property
+    def teachers(self):
+        return [t for t in self.agents if t.role == Role.TEACHER]
 
     @property
     def statements(self):
-        return [e for l in self._statements.values() for e in l]
+        return [s for l in self._statements.values() for s in l]
+
+    @statements.setter
+    def statements(self, statements):
+        for s in statements:
+            self.add_statement(s)
 
     @property
     def groups(self):
         groups = {}
-        for agent in self.students.values():
+        for agent in self.agents:
             for group in agent.groups:
                 groups[group['id']] = group
         return groups
 
+    def add_agent(self, agent):
+        agent.env = self
+        self._agents[agent.name] = agent
+        statements = self._statements[agent.name]
+        if statements:
+            self._agents[agent.name].update(statements)
+
     def add_statement(self, statement):
-        student_name = statement['actor']
-        statements = self._statements[student_name]
+        agent_name = statement['actor']
+        statements = self._statements[agent_name]
         statements.append(statement)
-        if student_name in self.students.keys():
-            self.students[student_name].update(statements)
+        if agent_name in self._agents.keys():
+            self.students[agent_name].update(statements)
 
     def simulate(self, tmax, verbose=False):
         """
@@ -80,7 +97,7 @@ class Environment(object):
         tmin = 0
         while tmin < tmax:
             tmin = tmax
-            for s in self.students.values():
+            for s in self.students:
                 statement = s.study()
                 t = statement['timestamp']
                 tmin = min(t, tmin)
@@ -106,9 +123,9 @@ class Environment(object):
         """
         method_dict = {'mcmc': MCMC}
         assert method.lower() in method_dict.keys()
-        params.extend([s.params for s in self.students.values()])
+        params.extend([s.params for s in self.students])
         sampler = method_dict[method.lower()](params)
-        sampler.sample(iter=10000, burn=1000, thin=10)
+        sampler.sample(iter=10000, burn=1000, thin=10, )
         return sampler
 
     def _get_structure(self, agents):
@@ -132,11 +149,11 @@ class Environment(object):
             username = agent.name
             role = agent.role
             nodes[username] = role
-            if role == 'user:eleve':
+            if role == Role.STUDENT:
                 for g in agent.groups:
                     adjancy[g['id']].add(username)
                     nodes[g['id']] = g['type']
-            if role == 'user:enseignant':
+            if role == Role.TEACHER:
                 for g in agent.groups:
                     adjancy[username].add(g['id'])
                     nodes[g['id']] = g['type']
@@ -144,22 +161,22 @@ class Environment(object):
         self.nodes = nodes
         return nodes, adjancy
 
-    def _get_students(self, node, discard_inactive):
-        nodes, structure = self.node, self.structure
-        if discard_inactive:
+    def _get_students(self, node, keep_inactive):
+        nodes, structure = self.nodes, self.structure
+        if not keep_inactive:
             active_agents = get_active_agents(self.statements)
             nodes, structure = filter_by_users(nodes, structure, active_agents)
         role = nodes[node]
-        if role == 'user:eleve':
+        if role == Role.STUDENT:
             return set([node])
         students = set()
         for child in self.structure[node]:
-            students = students.union(self._get_students(child))
+            students = students.union(self._get_students(child, keep_inactive))
         return students
 
-    def plot_group_activity(self, node, discard_inactive=True):
+    def plot_group_activity(self, node, keep_inactive=True):
         import matplotlib.pyplot as plt
-        students = self._get_students(node, discard_inactive)
+        students = self._get_students(node, keep_inactive)
         print("STUDENTS : {}".format(students))
         _, axes = plt.subplots(len(students), 1, sharex='col', sharey='row',
                                figsize=(15, len(students)))
@@ -169,3 +186,103 @@ class Environment(object):
             y = [1] * len(timestamps)
             axes[i].stem(timestamps, y)
         plt.savefig(node +".png")
+
+    def to_gdf(self, filename='test.gdf'):
+        """
+        Formats the adjancy list to `.gdf` (Gephi file)
+        """
+        nodes, adjancy = self.nodes, self.structure
+        with open(filename, 'w') as f:
+            f.write('nodedef> name VARCHAR, role VARCHAR\n')
+            for name, role in nodes.items():
+                f.write("{}, {}\n".format(name, role))
+            f.write('edgedef> node1 VARCHAR, node2 VARCHAR, weight DOUBLE\n')
+            for parent, children in list(adjancy.items()):
+                for child in children:
+                    weight = 1 if nodes[parent] == 'group' else 3
+                    f.write("{}, {}, {}\n".format(parent, child, weight))
+
+
+def get_active_agents(statements):
+    """
+    Takes a list of statements and returns a reference users list.
+
+    Arguments
+    ---------
+    nodes: list[statements]
+        List of statements
+
+    Returns
+    -------
+    users_list: list[str]
+        List of users
+    """
+    return {s['actor'] for s in statements}
+
+
+def contains_active_student(node_name, adjancy, roles, keep):
+    """
+    Finds if there is a student in the children of `node_name`
+
+    Arguments
+    ---------
+    node_name: str
+        Name of the current node
+
+    adjancy: dict(str: [str])
+        Adjancy list of agents
+
+    roles: dict(str: str)
+        Role of the agents
+
+    Return
+    ------
+    True or False
+    """
+    if node_name in keep:
+        return True
+    for child_name in adjancy[node_name]:
+        if contains_active_student(child_name, adjancy, roles, keep):
+            return True
+    return False
+
+
+def filter_by_users(nodes, adjancy, active_agents):
+    """
+    Takes a list of nodes, an adjancy list. Remove the non referenced
+    users from the passed user reference list.
+
+    Arguments
+    ---------
+    nodes: set[str]
+        List of agent's names.
+
+    adjancy: dict(str: [Agents])
+        Adjancy lists indexed by agent name (agent_names -> agents).
+
+    user_reference: set[str]
+        The reference set of users.
+
+    Returns
+    -------
+    nodes_clean:
+        The filtered nodes set.
+
+    nodes_clean:
+        The filtered adjancy list.
+    """
+    nodes_keep = set()
+    for name, role in nodes.items():
+        if name in active_agents and role == 'user:eleve':
+            nodes_keep.add(name)
+
+    for node_name in dict(adjancy).keys():
+        if contains_active_student(node_name, adjancy, nodes, nodes_keep):
+            nodes_keep.add(node_name)
+
+    nodes_clean = {k: v for k, v in nodes.items() if k in nodes_keep}
+    adjancy_clean = {k: v.intersection(nodes_keep) for k, v in adjancy.items()
+                     if k in nodes_keep}
+    # TODO: Could be interesting to keep the inactive users for plotting.
+
+    return nodes_clean, adjancy_clean

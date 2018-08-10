@@ -14,8 +14,8 @@ class WrongAssignment(Exception):
 class Student(Agent):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, groups=None, env=None):
-        super(Student, self).__init__(name, groups, env)
+    def __init__(self, name, role=[], groups=None, env=None):
+        super(Student, self).__init__(name, role, groups, env)
         self.env = env
         self.name = name
 
@@ -36,8 +36,8 @@ class PoissonStudent(Student):
         `lambda` parameter for the Poisson distribution
     """
 
-    def __init__(self, name, lam=None, env=None):
-        super(PoissonStudent, self).__init__(name, env)
+    def __init__(self, name, role=None, groups=[], lam=None, env=None):
+        super(PoissonStudent, self).__init__(name, role, groups, env)
         if lam is not None:
             self.lam = lam
         else:
