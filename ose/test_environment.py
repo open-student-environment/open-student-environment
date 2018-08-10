@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
     def test_environment(self):
         env = Environment(self.students, self.statements)
-        self.assertEqual(len(env.statements.keys()),
+        self.assertEqual(len(env._statements.keys()),
                          3,
                          msg="The environment created a different"
                              " number of student than there is in"
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
         student = PoissonStudent(name='John', lam=2)
         env.add_student(student)
         self.assertEqual(len(env.students[student.name].dt),
-                         len(env.statements[
+                         len(env._statements[
                                  student.name]),
                          msg="The student statements and dt have different "
                              "sizes")
