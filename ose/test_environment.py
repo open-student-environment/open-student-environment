@@ -1,7 +1,9 @@
 import unittest
 from .environment import Environment
-from .student import PoissonStudent
+from ose.agent.student import PoissonStudent
 from pymc import Uniform, MCMC
+
+from ose.agent import Agent
 
 
 class Test(unittest.TestCase):
@@ -77,6 +79,38 @@ class Test(unittest.TestCase):
         res = env.fit([lam], method='mcmc')
         self.assertIsInstance(res, MCMC,
                               msg="The output of fit is not an PYMC instance")
+
+    def test_initialization(self):
+        names = ['a', 'b', 'c', 'd']
+        g = [
+            {'id': 1, 'label': 'level 2', 'type': 'level'},
+            {'id': 2, 'label': 'CM2', 'type': 'class'},
+            {'id': 3, 'label': 'Jules Ferry', 'type': 'school'}
+        ]
+        agents = [Agent(name, groups=[g[i % 3]]) for i, name in enumerate(names)]
+        env = Environment(agents)
+        self.assertEqual(env.groups, {group['id']: group for group in g})
+
+    def test_get_structure(self):
+        g = [
+            {'id': 1, 'label': 'level 2', 'type': 'level'},
+            {'id': 2, 'label': 'CM2', 'type': 'class'},
+            {'id': 3, 'label': 'CM1', 'type': 'class'},
+            {'id': 4, 'label': 'Jules Ferry', 'type': 'school'},
+            {'id': 5, 'label': 'Jean Jaures', 'type': 'school'}
+        ]
+        t1 = Agent(name='teacher 1', groups=[g[3], g[1], g[2]])
+        t2 = Agent(name='teacher 2', groups=[g[0], g[4]])
+        s1 = Agent(name='student 1', groups=[g[1]])
+        s2 = Agent(name='student 2', groups=[g[1]])
+        s3 = Agent(name='student 3', groups=[g[1]])
+        s4 = Agent(name='student 4', groups=[g[2]])
+        s5 = Agent(name='student 5', groups=[g[2]])
+        s6 = Agent(name='student 6', groups=[g[0]])
+
+        agents = [t1, t2, s1, s2, s3, s4, s5, s6]
+        env = Environment(agents)
+        structure = env._get_structure(self.students)
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testPoissonStudent']

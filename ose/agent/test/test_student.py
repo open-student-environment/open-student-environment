@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from .student import PoissonStudent, WrongAssignment
+from ose.agent import PoissonStudent, WrongAssignment
 
 statements = [
     {'actor': 'Dave', 'verb': 'do', 'object': 'thing', 'timestamp': 1},

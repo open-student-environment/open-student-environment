@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 from pymc import MCMC
 import datetime
+from ose.utils import filter_by_users, get_active_agents
 
 
 class Environment(object):
@@ -45,7 +46,15 @@ class Environment(object):
 
     @property
     def statements(self):
-        return [e  for l in self._statements.values() for e in l]
+        return [e for l in self._statements.values() for e in l]
+
+    @property
+    def groups(self):
+        groups = {}
+        for agent in self.students.values():
+            for group in agent.groups:
+                groups[group['id']] = group
+        return groups
 
     def add_statement(self, statement):
         student_name = statement['actor']
@@ -102,24 +111,61 @@ class Environment(object):
         sampler.sample(iter=10000, burn=1000, thin=10)
         return sampler
 
-    def _get_students(self, agent):
-        role = self.nodes[agent]
+    def _get_structure(self, agents):
+        """
+        Extracts adjancy information from the list of agents
+
+        Arguments
+        ---------
+        data: list[Agents]
+            Agents datastructure
+
+        Return
+        ------
+        agents: dict [str -> str]
+
+        adjancy: dict [str -> list[str]]
+        """
+        nodes = {}
+        adjancy = defaultdict(set)
+        for agent in agents:
+            username = agent.name
+            role = agent.role
+            nodes[username] = role
+            if role == 'user:eleve':
+                for g in agent.groups:
+                    adjancy[g['id']].add(username)
+                    nodes[g['id']] = g['type']
+            if role == 'user:enseignant':
+                for g in agent.groups:
+                    adjancy[username].add(g['id'])
+                    nodes[g['id']] = g['type']
+        self.structure = adjancy
+        self.nodes = nodes
+        return nodes, adjancy
+
+    def _get_students(self, node, discard_inactive):
+        nodes, structure = self.node, self.structure
+        if discard_inactive:
+            active_agents = get_active_agents(self.statements)
+            nodes, structure = filter_by_users(nodes, structure, active_agents)
+        role = nodes[node]
         if role == 'user:eleve':
-            return set([agent])
+            return set([node])
         students = set()
-        for child in self.structure[agent]:
+        for child in self.structure[node]:
             students = students.union(self._get_students(child))
         return students
 
-    def plot_group_activity(self, group_name):
+    def plot_group_activity(self, node, discard_inactive=True):
         import matplotlib.pyplot as plt
-        students = self._get_students(group_name)
+        students = self._get_students(node, discard_inactive)
         print("STUDENTS : {}".format(students))
-        f, axes = plt.subplots(len(students), 1, sharex='col', sharey='row',
+        _, axes = plt.subplots(len(students), 1, sharex='col', sharey='row',
                                figsize=(15, len(students)))
         for i, student in enumerate(students):
             timestamps = [datetime.datetime.fromtimestamp(s['timestamp']) for s
                           in self._statements[student]]
             y = [1] * len(timestamps)
             axes[i].stem(timestamps, y)
-        plt.savefig(group_name+".png")
+        plt.savefig(node +".png")

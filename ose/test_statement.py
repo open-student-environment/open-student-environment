@@ -1,6 +1,6 @@
 import unittest
 from .environment import Environment
-from .student import PoissonStudent
+from ose.agent.student import PoissonStudent
 from .statement import load_statements, load_file, \
     extract_information_educlever
 

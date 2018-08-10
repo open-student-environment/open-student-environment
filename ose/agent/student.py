@@ -4,16 +4,18 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from pymc import Exponential, Uniform
 
+from .base import Agent
 
 
 class WrongAssignment(Exception):
     pass
 
 
-class Student(object):
+class Student(Agent):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, env=None):
+    def __init__(self, name, groups=None, env=None):
+        super(Student, self).__init__(name, groups, env)
         self.env = env
         self.name = name
 
