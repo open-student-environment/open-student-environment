@@ -4,16 +4,18 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from pymc import Exponential, Uniform
 
+from .base import Agent
 
 
 class WrongAssignment(Exception):
     pass
 
 
-class Student(object):
+class Student(Agent):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, env=None):
+    def __init__(self, name, role=[], groups=None, env=None):
+        super(Student, self).__init__(name, role, groups, env)
         self.env = env
         self.name = name
 
@@ -34,8 +36,8 @@ class PoissonStudent(Student):
         `lambda` parameter for the Poisson distribution
     """
 
-    def __init__(self, name, lam=None, env=None):
-        super(PoissonStudent, self).__init__(name, env)
+    def __init__(self, name, role=None, groups=[], lam=None, env=None):
+        super(PoissonStudent, self).__init__(name, role, groups, env)
         if lam is not None:
             self.lam = lam
         else:
