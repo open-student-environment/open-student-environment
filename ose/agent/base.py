@@ -19,6 +19,9 @@ class Agent(object):
     def __repr__(self):
         return "{} ({})".format(self.name, self.role)
 
+    def update(self, statements):
+        pass
+
 
 def load_agents(filename):
     """
