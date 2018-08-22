@@ -170,22 +170,28 @@ class Environment(object):
         if role == Role.STUDENT:
             return set([node])
         students = set()
-        for child in self.structure[node]:
+        for child in structure[node]:
             students = students.union(self._get_students(child, keep_inactive))
         return students
 
     def plot_group_activity(self, node, keep_inactive=True):
         import matplotlib.pyplot as plt
         students = self._get_students(node, keep_inactive)
-        print("STUDENTS : {}".format(students))
-        _, axes = plt.subplots(len(students), 1, sharex='col', sharey='row',
-                               figsize=(15, len(students)))
+        _, axes = plt.subplots(
+            len(students),
+            1,
+            sharex='col',
+            sharey='row',
+            figsize=(15, len(students))
+        )
         for i, student in enumerate(students):
-            timestamps = [datetime.datetime.fromtimestamp(s['timestamp']) for s
-                          in self._statements[student]]
+            timestamps = []
+            for s in self._statements[student]:
+                timestamp = datetime.datetime.fromtimestamp(s['timestamp'])
+                timestamps.append(timestamp)
             y = [1] * len(timestamps)
             axes[i].stem(timestamps, y)
-        plt.savefig(node +".png")
+        plt.show()
 
     def to_gdf(self, filename='test.gdf'):
         """
