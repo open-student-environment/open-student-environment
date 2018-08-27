@@ -7,6 +7,6 @@ setup(
     version='0.0',
     authors=['Arnaud Rachez', 'David Panou'],
     author_email=['arnaud.rachez@gmail.com', 'david.panou@gmail.com'],
-    packages=['ose'],
+    packages=['ose','ose.agent'],
     requires=['numpy', 'scipy', 'pymc'],
 )
