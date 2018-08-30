@@ -151,12 +151,17 @@ class Environment(object):
             nodes[username] = role
             if role == Role.STUDENT:
                 for g in agent.groups:
-                    adjancy[g['id']].add(username)
-                    nodes[g['id']] = g['type']
+                    if g['type'] != 'school':
+                        adjancy[g['id']].add(username)
+                        nodes[g['id']] = g['type']
             if role == Role.TEACHER:
                 for g in agent.groups:
-                    adjancy[username].add(g['id'])
-                    nodes[g['id']] = g['type']
+                    if g['type'] == 'school':
+                        adjancy[g['id']].add(username)
+                        nodes[g['id']] = g['type']
+                    else:
+                        adjancy[username].add(g['id'])
+                        nodes[g['id']] = g['type']
         self.structure = adjancy
         self.nodes = nodes
         return nodes, adjancy
