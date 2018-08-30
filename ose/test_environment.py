@@ -119,11 +119,10 @@ class Test(unittest.TestCase):
         env = Environment(agents)
         _, adjancy = env._get_structure(agents)
         expected_adjancy = {
-            't1': {2, 3, 4},
-            't2': {1, 5},
+            4: {'t1'}, 't1': {2, 3},
+            't2': {1}, 5: {'t2'},
             2: {'s1', 's2', 's3'},
-            3: {'s5', 's4'},
-            1: {'s6'}
+            3: {'s5', 's4'}, 1: {'s6'}
         }
         self.assertEqual(adjancy, expected_adjancy)
 
