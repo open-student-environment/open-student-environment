@@ -39,7 +39,6 @@ Library imports.
 Here, the student activity is modeled by a Poisson distribution whose parameter `\lambda` have to be computed.
 
 ````
-
 filename = 'data/statements-brneac3-20180301-20180531.json'
 statements = load_file(filename)
 statements = load_statements(statements)
@@ -69,7 +68,7 @@ Fitting and plotting the expected values of `\lambda` parameters for every stude
 
 # Visualization
 
-Results can be visualized through [client interface](https://github.com/open-student-environment/ose-client).
+Results can be visualized through the [xAPI dashboard](https://github.com/open-student-environment/ose-client).
 
 # Testing
 
